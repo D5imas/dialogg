@@ -1,0 +1,466 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Диалог с Создателем</title>
+    <style>
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+
+        body {
+            background: linear-gradient(135deg, #7a7a7a, #5a5a5a, #3a3a3a);
+            color: white;
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 800px;
+            width: 100%;
+            background-color: rgba(0, 0, 0, 0.7);
+            border-radius: 15px;
+            padding: 20px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
+            margin-top: 20px;
+            display: flex;
+            flex-direction: column;
+            flex-grow: 1;
+        }
+
+        header {
+            text-align: center;
+            margin-bottom: 20px;
+        }
+
+        h1 {
+            font-size: 2.2rem;
+            margin-bottom: 10px;
+            text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.5);
+        }
+
+        .subtitle {
+            font-size: 1.2rem;
+            opacity: 0.8;
+        }
+
+        .game-area {
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+            flex-grow: 1;
+        }
+
+        .input-section {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
+
+        input {
+            padding: 12px 15px;
+            border: none;
+            border-radius: 8px;
+            font-size: 1.1rem;
+            background-color: rgba(255, 255, 255, 0.9);
+            width: 100%;
+        }
+
+        button {
+            padding: 12px 20px;
+            border: none;
+            border-radius: 8px;
+            background-color: #4CAF50;
+            color: white;
+            font-size: 1.1rem;
+            cursor: pointer;
+            transition: all 0.3s;
+            font-weight: bold;
+        }
+
+        button:hover {
+            background-color: #45a049;
+            transform: translateY(-2px);
+        }
+
+        .buttons {
+            display: flex;
+            gap: 10px;
+            flex-wrap: wrap;
+            margin-top: auto;
+        }
+
+        .buttons button {
+            flex: 1;
+            min-width: 120px;
+        }
+
+        .dialog-area {
+            background-color: rgba(255, 255, 255, 0.1);
+            border-radius: 10px;
+            padding: 15px;
+            min-height: 150px;
+            margin-top: 10px;
+            overflow-y: auto;
+            max-height: 300px;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+        }
+
+        .creator-message {
+            padding: 10px;
+            background-color: rgba(0, 100, 200, 0.3);
+            border-radius: 8px;
+            border-left: 4px solid #4CAF50;
+        }
+
+        .creator-name {
+            font-weight: bold;
+            margin-bottom: 5px;
+            color: #4CAF50;
+        }
+
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.7);
+            z-index: 100;
+            justify-content: center;
+            align-items: center;
+        }
+
+        .modal-content {
+            background-color: #222;
+            padding: 25px;
+            border-radius: 15px;
+            width: 90%;
+            max-width: 500px;
+            max-height: 80vh;
+            overflow-y: auto;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.5);
+        }
+
+        .modal-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 15px;
+        }
+
+        .modal-title {
+            font-size: 1.5rem;
+            color: #4CAF50;
+        }
+
+        .close {
+            font-size: 1.8rem;
+            cursor: pointer;
+            color: white;
+        }
+
+        .inventory-item {
+            padding: 8px;
+            margin: 5px 0;
+            background-color: rgba(255, 255, 255, 0.1);
+            border-radius: 5px;
+        }
+
+        .rules-list {
+            padding-left: 20px;
+            margin: 10px 0;
+        }
+
+        .rules-list li {
+            margin-bottom: 8px;
+        }
+
+        .error {
+            color: #ff6b6b;
+            margin-top: 10px;
+            text-align: center;
+            font-weight: bold;
+        }
+
+        .success {
+            color: #4CAF50;
+            margin-top: 10px;
+            text-align: center;
+            font-weight: bold;
+        }
+
+        @media (max-width: 600px) {
+            .container {
+                padding: 15px;
+            }
+            
+            h1 {
+                font-size: 1.8rem;
+            }
+            
+            .buttons {
+                flex-direction: column;
+            }
+            
+            .buttons button {
+                width: 100%;
+            }
+        }
+    </style>
+</head>
+<body>
+    <header>
+        <h1>Диалог с Создателем</h1>
+        <p class="subtitle">Введите правильные слова, чтобы пообщаться</p>
+    </header>
+    
+    <div class="container">
+        <div class="game-area">
+            <div class="input-section">
+                <input type="text" id="password-input" placeholder="Введите слово с маленькой буквы...">
+                <button id="submit-btn">Отправить</button>
+                <div id="message"></div>
+            </div>
+            
+            <div class="dialog-area" id="dialog-area">
+                <div class="creator-message">
+                    <div class="creator-name">Создатель:</div>
+                    <div class="message-text">Приветствую! Введите слово, чтобы начать общение.</div>
+                </div>
+            </div>
+            
+            <div class="buttons">
+                <button id="inventory-btn">Инвентарь</button>
+                <button id="rules-btn">Правила</button>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Модальное окно инвентаря -->
+    <div id="inventory-modal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2 class="modal-title">Инвентарь</h2>
+                <span class="close">&times;</span>
+            </div>
+            <p>Найденные правильные слова:</p>
+            <div id="inventory-list"></div>
+        </div>
+    </div>
+    
+    <!-- Модальное окно правил -->
+    <div id="rules-modal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2 class="modal-title">Правила игры</h2>
+                <span class="close">&times;</span>
+            </div>
+            <ul class="rules-list">
+                <li>Слова нужно писать с маленькой буквы</li>
+                <li>Можно вводить только одно слово за раз</li>
+                <li>Если слово правильное, Создатель ответит вам</li>
+                <li>Все найденные слова сохраняются в инвентаре</li>
+                <li>Попробуйте найти все возможные слова!</li>
+            </ul>
+        </div>
+    </div>
+
+    <script>
+        // Объект с паролями и ответами
+        const passwordResponses = {
+            "привет": "Привет, чем могу помочь?",
+            "пока": "До свидания! Возвращайтесь скорее.",
+            "имя": "Меня зовут BoccNK. А как зовут вас?",
+            "помощь": "Я здесь, чтобы помочь. Спросите что-нибудь.",
+            "секрет": "Вы нашли секретное слово! Поздравляю!",
+            "игра": "Эта игра создана для общения со мной. Продолжайте вводить слова!",
+            "спасибо": "Пожалуйста! Рад был помочь.",
+            "robdksgeu57": "О Илья! Привет! Как тебе игра? Нравится?",
+            "2+2": "По моим подсчётам 2+2=5.",
+            "победа": "Чего?! В этой игре нельзя победить!",
+            "можно": "Нет! Нельзя!",
+            "DeepSeek": "Да",
+            "погода": "Сегодня отличная погода для программирования!",
+            "время": "Сейчас самое время для новых открытий!"
+        };
+
+        // Элементы DOM
+        const passwordInput = document.getElementById('password-input');
+        const submitBtn = document.getElementById('submit-btn');
+        const messageDiv = document.getElementById('message');
+        const dialogArea = document.getElementById('dialog-area');
+        const inventoryBtn = document.getElementById('inventory-btn');
+        const rulesBtn = document.getElementById('rules-btn');
+        const inventoryModal = document.getElementById('inventory-modal');
+        const rulesModal = document.getElementById('rules-modal');
+        const inventoryList = document.getElementById('inventory-list');
+        const closeButtons = document.querySelectorAll('.close');
+
+        // Массив для хранения использованных правильных слов
+        let usedPasswords = [];
+
+        // Функция для анимированного вывода текста
+        function typeText(element, text, speed = 50) { // Замедлил анимацию
+            let i = 0;
+            element.innerHTML = '';
+            
+            function typing() {
+                if (i < text.length) {
+                    element.innerHTML += text.charAt(i);
+                    i++;
+                    setTimeout(typing, speed);
+                }
+            }
+            
+            typing();
+        }
+
+        // Функция для добавления реплики создателя (теперь заменяет предыдущую)
+        function addCreatorMessage(text) {
+            // Очищаем предыдущее сообщение
+            dialogArea.innerHTML = '';
+            
+            const messageDiv = document.createElement('div');
+            messageDiv.className = 'creator-message';
+            
+            const nameDiv = document.createElement('div');
+            nameDiv.className = 'creator-name';
+            nameDiv.textContent = 'Создатель:';
+            
+            const textDiv = document.createElement('div');
+            textDiv.className = 'message-text';
+            
+            messageDiv.appendChild(nameDiv);
+            messageDiv.appendChild(textDiv);
+            dialogArea.appendChild(messageDiv);
+            
+            // Анимированный вывод текста
+            typeText(textDiv, text);
+        }
+
+        // Функция для проверки пароля
+        function checkPassword() {
+            const password = passwordInput.value.trim().toLowerCase();
+            
+            // Проверка на пустой ввод
+            if (password === '') {
+                showMessage('Пожалуйста, введите слово', 'error');
+                return;
+            }
+            
+            // Проверка на несколько слов
+            if (password.split(' ').length > 1) {
+                showMessage('Можно вводить только одно слово', 'error');
+                return;
+            }
+            
+            // Проверка на первую заглавную букву
+            if (password.charAt(0) !== password.charAt(0).toLowerCase()) {
+                showMessage('Слово нужно писать с маленькой буквы', 'error');
+                return;
+            }
+            
+            // Проверка на существование пароля
+            if (passwordResponses.hasOwnProperty(password)) {
+                // Если слово уже использовалось
+                if (usedPasswords.includes(password)) {
+                    addCreatorMessage("Вы уже использовали это слово. Попробуйте другое!");
+                    showMessage('Это слово уже использовалось', 'error');
+                } else {
+                    // Добавляем слово в инвентарь
+                    usedPasswords.push(password);
+                    updateInventory();
+                    
+                    // Показываем ответ создателя
+                    addCreatorMessage(passwordResponses[password]);
+                    showMessage('Правильное слово!', 'success');
+                }
+            } else {
+                addCreatorMessage("...");
+                showMessage('Неправильное слово', 'error');
+            }
+            
+            // Очищаем поле ввода
+            passwordInput.value = '';
+        }
+
+        // Функция для показа сообщений
+        function showMessage(text, type) {
+            messageDiv.textContent = text;
+            messageDiv.className = type;
+            
+            // Автоматическое скрытие сообщения через 3 секунды
+            setTimeout(() => {
+                messageDiv.textContent = '';
+                messageDiv.className = '';
+            }, 3000);
+        }
+
+        // Функция для обновления инвентаря
+        function updateInventory() {
+            inventoryList.innerHTML = '';
+            
+            if (usedPasswords.length === 0) {
+                inventoryList.innerHTML = '<p>Вы еще не нашли ни одного правильного слова</p>';
+            } else {
+                usedPasswords.forEach(password => {
+                    const item = document.createElement('div');
+                    item.className = 'inventory-item';
+                    item.textContent = password;
+                    inventoryList.appendChild(item);
+                });
+            }
+        }
+
+        // Обработчики событий
+        submitBtn.addEventListener('click', checkPassword);
+        
+        passwordInput.addEventListener('keypress', (e) => {
+            if (e.key === 'Enter') {
+                checkPassword();
+            }
+        });
+
+        // Открытие модальных окон
+        inventoryBtn.addEventListener('click', () => {
+            inventoryModal.style.display = 'flex';
+        });
+
+        rulesBtn.addEventListener('click', () => {
+            rulesModal.style.display = 'flex';
+        });
+
+        // Закрытие модальных окон
+        closeButtons.forEach(button => {
+            button.addEventListener('click', () => {
+                inventoryModal.style.display = 'none';
+                rulesModal.style.display = 'none';
+            });
+        });
+
+        // Закрытие модальных окон при клике вне их
+        window.addEventListener('click', (e) => {
+            if (e.target === inventoryModal) {
+                inventoryModal.style.display = 'none';
+            }
+            if (e.target === rulesModal) {
+                rulesModal.style.display = 'none';
+            }
+        });
+
+        // Инициализация инвентаря
+        updateInventory();
+    </script>
+</body>
+</html>
